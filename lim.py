@@ -1,12 +1,6 @@
 import limmy
 import time
 
-# How to use limmy, by Adrian Ornelas
-
-# First, create motor objects. This will automatically start the heartbeat thread that keeps the motor alive.
-
-# serial_port_1 = 'COM15' # Change this to the serial port of your VESC, on Linux (Raspberry Pi) it will be something like '/dev/ttyUSB0'
-# serial_port_2 = 'COM8'
 serial_port_1 = '/dev/tty.usbmodem3041'
 serial_port_2 = '/dev/tty.usbmodem3'
 
@@ -17,12 +11,7 @@ motor_2 = limmy.VESC(serial_port=serial_port_2)
 
 print("Firmware 1: ", motor_1.get_firmware_version())
 print("Firmware 2: ", motor_2.get_firmware_version())
-time.sleep(1) # Wait for the motor controller to respond and set up Comms
-
-# Motor can be started via motor.engage command:
-    # The utilization for the command is: motor.engage(current, frequency)
-    # Where current, I, is in Amps and is a float above 0.0
-    # And frequency, f, is in Hz and is an float above 0.0
+time.sleep(1)
 
 f = 30
 I = 30
@@ -33,6 +22,36 @@ direction = True
 
 input('[INFO] Wait for input to start')
 
+def safe_stop():
+    try:
+        motor_1.halt()
+    except Exception:
+        pass
+    try:
+        motor_2.halt()
+    except Exception:
+        pass
+
+def auto_cycle():
+    print('Auto-cycle starting for 100 seconds. Switching every 3.25s.')
+    auto_direction = True
+    end_time = time.time() + 100.0
+    try:
+        while time.time() < end_time:
+            if auto_direction:
+                motor_2.halt()
+                motor_1.engage(I, f)
+            else:
+                motor_1.halt()
+                motor_2.engage(I, f)
+            auto_direction = not auto_direction
+            time.sleep(3.25)
+    except Exception as e:
+        print(f'[WARNING] Auto-cycle interrupted: {e}')
+    finally:
+        safe_stop()
+        print('[INFO] Auto-cycle complete. Motors halted.')
+
 while run:
     if direction:
         motor_2.halt()
@@ -42,18 +61,29 @@ while run:
         motor_1.halt()
         motor_2.engage(I, f)
         direction = True
-    val = input("Enter: Change directions, Space: Change parameters, Any other key: Abort")
+
+    val = input("Enter: Change directions | Space: Change parameters | a: Auto-cycle | Any other key: Abort\n> ")
+
     if val == ' ':
-        motor_1.halt()
-        motor_2.halt()
+        safe_stop()
         I = float(input("Enter current: "))
         val = ''
-    run = val == ''
+    elif val == 'a':
+        safe_stop()
+        auto_cycle()
+        run = False
+    elif val != '':
+        run = False
 
-motor_1.halt()
-motor_2.halt()
+safe_stop()
 
 time.sleep(1)
 
-motor_1.stop_heartbeat()
-motor_2.stop_heartbeat()
+try:
+    motor_1.stop_heartbeat()
+except Exception:
+    pass
+try:
+    motor_2.stop_heartbeat()
+except Exception:
+    pass
