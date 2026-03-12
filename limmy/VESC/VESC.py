@@ -37,8 +37,11 @@ class VESC(object):
 
         # check firmware version and set GetValue fields to old values if pre version 3.xx
         version = self.get_firmware_version()
-        if int(version.split('.')[0]) < 3:
-            GetValues.fields = pre_v3_33_fields
+        if version and 'None' not in version:
+            if int(version.split('.')[0]) < 3:
+                GetValues.fields = pre_v3_33_fields
+        else:
+            print(f'[WARNING] Could not read firmware version on {serial_port}')
 
         # store message info for getting values so it doesn't need to calculate it every time
         msg = GetValues()
