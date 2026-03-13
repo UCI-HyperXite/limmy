@@ -5,7 +5,8 @@ import time
 
 # First, create a motor object. This will automatically start the heartbeat thread that keeps the motor alive.
 
-serial_port = 'COM15' # Change this to the serial port of your VESC, on Linux (Raspberry Pi) it will be something like '/dev/ttyUSB0'
+# serial_port = 'COM15' # Change this to the serial port of your VESC, on Linux (Raspberry Pi) it will be something like '/dev/ttyUSB0'
+serial_port_1 = '/dev/tty.usbmodem3'
 
 motor = limmy.VESC(serial_port=serial_port)
 

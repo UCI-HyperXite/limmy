@@ -58,12 +58,12 @@ class VESC(object):
             self.serial_port.close()
 
     def _heartbeat_cmd_func(self):
-        """
-        Continuous function calling that keeps the motor alive
-        """
         while not self._stop_heartbeat.isSet():
             time.sleep(0.1)
-            self.write(alive_msg)
+            try:
+                self.write(alive_msg)
+            except Exception:
+                break
 
     def start_heartbeat(self):
         """

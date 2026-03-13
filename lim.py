@@ -1,8 +1,8 @@
 import limmy
 import time
 
-serial_port_1 = '/dev/tty.usbmodem3041'
-serial_port_2 = '/dev/tty.usbmodem3'
+serial_port_1 = '/dev/tty.usbmodem3'
+serial_port_2 = '/dev/tty.usbmodem3041'
 
 print('[INFO] Initializing motor 1 on port: ', serial_port_1)
 motor_1 = limmy.VESC(serial_port=serial_port_1)
@@ -33,7 +33,7 @@ def safe_stop():
         pass
 
 def auto_cycle():
-    print('Auto-cycle starting for 100 seconds. Switching every 3.25s.')
+    print('Auto-cycle starting for 100 seconds. Switching every 2.75s.')
     auto_direction = True
     end_time = time.time() + 100.0
     try:
@@ -45,7 +45,7 @@ def auto_cycle():
                 motor_1.halt()
                 motor_2.engage(I, f)
             auto_direction = not auto_direction
-            time.sleep(3.25)
+            time.sleep(2.75)
     except Exception as e:
         print(f'[WARNING] Auto-cycle interrupted: {e}')
     finally:
